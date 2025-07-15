@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Weather Tracker</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 0; }
+    canvas { border: 1px solid #ccc; margin-top: 1em; }
+    #status { margin-top: 10px; }
+    .section { margin: 20px auto; width: 80%; max-width: 600px; }
+    .hidden { visibility: hidden; }
+  </style>
+</head>
+<body>
+  <div class="section">
+    <h1>Smart Weather Tracker</h1>
+    <p id="location">Fetching location...</p>
+    <p id="network">Checking network status...</p>
+    <p id="status">Waiting for visibility...</p>
+    <canvas id="mapCanvas" width="300" height="300"></canvas>
+    <div id="observeMe" style="height:100px;background:#ffc;margin-top:50px;">Scroll to reveal me</div>
+  </div>
+
+  <script>
+    // Geolocation API
+    function getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          document.getElementById("location").textContent = `Latitude: ${lat.toFixed(4)}, Longitude: ${lon.toFixed(4)}`;
+          drawMap(lat, lon);
+        });
+      } else {
+        document.getElementById("location").textContent = "Geolocation not supported.";
+      }
+    }
+
+    // Canvas API
+    function drawMap(lat, lon) {
+      const canvas = document.getElementById("mapCanvas");
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "lightblue";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "red";
+      ctx.beginPath();
+      ctx.arc(canvas.width / 2, canvas.height / 2, 10, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.font = "14px Arial";
+      ctx.fillText(`You are here`, canvas.width / 2 - 30, canvas.height / 2 - 15);
+    }
+
+    // Network Information API
+    function checkNetwork() {
+      if (navigator.connection) {
+        const type = navigator.connection.effectiveType;
+        document.getElementById("network").textContent = `Network: ${type}`;
+      } else {
+        document.getElementById("network").textContent = "Network Info API not supported.";
+      }
+    }
+
+    // Intersection Observer API
+    const observerTarget = document.getElementById("observeMe");
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          document.getElementById("status").textContent = "Visibility Alert: Section is in view!";
+        } else {
+          document.getElementById("status").textContent = "Visibility Alert: Section is out of view.";
+        }
+      });
+    });
+    observer.observe(observerTarget);
+
+    // Background Tasks API (Progressive support)
+    if ('BackgroundFetchManager' in self) {
+      console.log("Background Tasks API supported. You could fetch data in background.");
+      // Example integration could go here if supported by browser
+    }
+
+    getLocation();
+    checkNetwork();
+  </script>
+</body>
+</html>
